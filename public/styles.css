@@ -1,21 +1,27 @@
 :root {
-    --primary: #6366f1;
+    --primary: #5855eb;
     --primary-dark: #4f46e5;
-    --success: #10b981;
+    --primary-text: #818cf8;
+    --success: #0d8a62;
+    --success-text: #34d399;
     --warning: #f59e0b;
     --error: #ef4444;
+    --error-text: #f87171;
     --bg: #0f172a;
     --bg-card: #1e293b;
     --text: #f1f5f9;
     --text-muted: #94a3b8;
     --border: #334155;
 
-    /* Channel themes */
+    /* Channel themes - WCAG AA compliant */
     --what-if: #6366f1;
+    --what-if-text: #a5b4fc;
     --what-if-light: rgba(99, 102, 241, 0.2);
     --human-odyssey: #f59e0b;
+    --human-odyssey-text: #fbbf24;
     --human-odyssey-light: rgba(245, 158, 11, 0.2);
     --classified-files: #ef4444;
+    --classified-files-text: #fca5a5;
     --classified-files-light: rgba(239, 68, 68, 0.2);
 }
 
@@ -79,7 +85,7 @@ body {
 }
 
 .nav-links a {
-    color: rgba(255, 255, 255, 0.8);
+    color: white;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s;
@@ -573,11 +579,11 @@ body {
 }
 
 .check-badge.ok {
-    color: var(--success);
+    color: var(--success-text);
 }
 
 .check-badge.bad {
-    color: var(--error);
+    color: var(--error-text);
 }
 
 .checks-actions {
@@ -692,17 +698,17 @@ body {
 
 .badge-what-if {
     background: var(--what-if-light);
-    color: var(--what-if);
+    color: var(--what-if-text);
 }
 
 .badge-human-odyssey {
     background: var(--human-odyssey-light);
-    color: var(--human-odyssey);
+    color: var(--human-odyssey-text);
 }
 
 .badge-classified-files {
     background: var(--classified-files-light);
-    color: var(--classified-files);
+    color: var(--classified-files-text);
 }
 
 .history-actions {
@@ -745,7 +751,7 @@ body {
 .stat-card .stat-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--primary-text);
     display: block;
 }
 
@@ -772,7 +778,7 @@ body {
 
 .stat-value {
     font-weight: 600;
-    color: var(--primary);
+    color: var(--primary-text);
 }
 
 /* Info */

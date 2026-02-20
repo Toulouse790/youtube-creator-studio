@@ -1,23 +1,14 @@
 import { ScheduledVideo, VideoSchedule } from '../types/scheduler.js';
-import { writeFile, readFile, mkdir, rename } from 'fs/promises';
+import { writeFile, readFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
-import crypto from 'crypto';
-
-/** Write JSON atomically: write to tmp file then rename into place. */
-async function atomicWriteJson(filePath: string, data: unknown): Promise<void> {
-  const tmp = `${filePath}.${crypto.randomUUID()}.tmp`;
-  await writeFile(tmp, JSON.stringify(data, null, 2));
-  await rename(tmp, filePath);
-}
 
 export class SchedulerDatabase {
   private dbPath = './data/scheduler.json';
   private schedulesPath = './data/schedules.json';
-  private ready: Promise<void>;
 
   constructor() {
-    this.ready = this.ensureDatabase();
+    this.ensureDatabase();
   }
 
   private async ensureDatabase() {
@@ -28,7 +19,7 @@ export class SchedulerDatabase {
     }
     
     if (!existsSync(this.dbPath)) {
-      await atomicWriteJson(this.dbPath, []);
+      await this.saveVideos([]);
     }
     
     if (!existsSync(this.schedulesPath)) {
@@ -49,14 +40,19 @@ export class SchedulerDatabase {
         { channelId: 'classified-files', weekday: 3, time: '18:00', enabled: true },
         { channelId: 'classified-files', weekday: 5, time: '18:00', enabled: true },
       ];
-      await atomicWriteJson(this.schedulesPath, defaultSchedules);
+      await this.saveSchedules(defaultSchedules);
     }
   }
 
   async getVideos(): Promise<ScheduledVideo[]> {
-    await this.ready;
+    // Ensure file exists before reading
+    await mkdir('./data', { recursive: true });
+    if (!existsSync(this.dbPath)) {
+      await writeFile(this.dbPath, '[]');
+    }
+
     const data = await readFile(this.dbPath, 'utf-8');
-    const parsed = JSON.parse(data) as Array<{
+    const parsed = JSON.parse(data || '[]') as Array<{
       scheduledDate: string;
       createdAt: string;
       publishedAt?: string;
@@ -71,7 +67,7 @@ export class SchedulerDatabase {
   }
 
   async saveVideos(videos: ScheduledVideo[]): Promise<void> {
-    await atomicWriteJson(this.dbPath, videos);
+    await writeFile(this.dbPath, JSON.stringify(videos, null, 2));
   }
 
   async addVideo(video: ScheduledVideo): Promise<void> {
@@ -107,13 +103,30 @@ export class SchedulerDatabase {
   }
 
   async getSchedules(): Promise<VideoSchedule[]> {
-    await this.ready;
+    // Ensure file exists before reading
+    await mkdir('./data', { recursive: true });
+    if (!existsSync(this.schedulesPath)) {
+      // Default schedules
+      const defaultSchedules: VideoSchedule[] = [
+        { channelId: 'what-if', weekday: 1, time: '10:00', enabled: true },
+        { channelId: 'what-if', weekday: 3, time: '10:00', enabled: true },
+        { channelId: 'what-if', weekday: 5, time: '10:00', enabled: true },
+        { channelId: 'human-odyssey', weekday: 2, time: '14:00', enabled: true },
+        { channelId: 'human-odyssey', weekday: 4, time: '14:00', enabled: true },
+        { channelId: 'human-odyssey', weekday: 6, time: '14:00', enabled: true },
+        { channelId: 'classified-files', weekday: 1, time: '18:00', enabled: true },
+        { channelId: 'classified-files', weekday: 3, time: '18:00', enabled: true },
+        { channelId: 'classified-files', weekday: 5, time: '18:00', enabled: true },
+      ];
+      await writeFile(this.schedulesPath, JSON.stringify(defaultSchedules, null, 2));
+    }
+
     const data = await readFile(this.schedulesPath, 'utf-8');
-    return JSON.parse(data);
+    return JSON.parse(data || '[]');
   }
 
   async saveSchedules(schedules: VideoSchedule[]): Promise<void> {
-    await atomicWriteJson(this.schedulesPath, schedules);
+    await writeFile(this.schedulesPath, JSON.stringify(schedules, null, 2));
   }
 
   async updateSchedule(channelId: string, weekday: number, updates: Partial<VideoSchedule>): Promise<void> {
